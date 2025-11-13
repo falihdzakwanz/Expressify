@@ -3,6 +3,7 @@ import cv2
 import numpy as np
 import math
 import random
+import os
 
 class UIManager:
     def __init__(self, width, height):
@@ -54,6 +55,102 @@ class UIManager:
         self.menu_time = 0
         self.particles = []
         self.init_particles()
+        
+        # Expression image settings
+        self.animation_time = 0
+        self.image_scale = 200  # Ukuran foto dalam pixel
+        
+        # Load expression photos
+        self.expression_images = {}
+        self.load_expression_images()
+        
+    def load_expression_images(self):
+        """Load expression images from assets folder"""
+        # Mapping dari ekspresi game ke nama file foto
+        image_mapping = {
+            "happy": "Senang.png",
+            "sad": "Sedih.png", 
+            "surprised": "Kaget.png",
+            "neutral": "Datar.png"
+        }
+        
+        # Get path to assets folder
+        base_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "assets", "photo")
+        
+        for expression, filename in image_mapping.items():
+            image_path = os.path.join(base_path, filename)
+            try:
+                # Load and scale image
+                image = pygame.image.load(image_path)
+                # Scale to standard size
+                image = pygame.transform.scale(image, (self.image_scale, self.image_scale))
+                self.expression_images[expression] = image
+                print(f"✓ Loaded {expression} image: {filename}")
+            except Exception as e:
+                print(f"✗ Failed to load {expression} image: {e}")
+                # Create placeholder if image fails to load
+                placeholder = pygame.Surface((self.image_scale, self.image_scale))
+                placeholder.fill(self.PURPLE)
+                self.expression_images[expression] = placeholder
+    
+    def draw_animated_expression_image(self, expression, x, y):
+        """Draw expression image with swaying animation"""
+        if expression not in self.expression_images:
+            return
+        
+        # Update animation time
+        self.animation_time += 0.1
+        
+        # Calculate swaying motion (left-right)
+        sway_amount = 30  # Maximum pixels to sway
+        sway_offset = math.sin(self.animation_time) * sway_amount
+        
+        # Calculate bobbing motion (up-down) - subtle
+        bob_amount = 10
+        bob_offset = math.sin(self.animation_time * 1.5) * bob_amount
+        
+        # Calculate rotation - slight tilt
+        rotation_amount = 5  # degrees
+        rotation = math.sin(self.animation_time * 0.8) * rotation_amount
+        
+        # Get image and apply rotation
+        image = self.expression_images[expression]
+        rotated_image = pygame.transform.rotate(image, rotation)
+        
+        # Calculate final position with animations
+        final_x = x + sway_offset - rotated_image.get_width() // 2
+        final_y = y + bob_offset - rotated_image.get_height() // 2
+        
+        # Add glow effect around image
+        glow_surface = pygame.Surface(
+            (rotated_image.get_width() + 40, rotated_image.get_height() + 40),
+            pygame.SRCALPHA
+        )
+        
+        # Multiple glow layers
+        for i in range(5, 0, -1):
+            alpha = 30 - i * 5
+            glow_size = (rotated_image.get_width() + i * 8, rotated_image.get_height() + i * 8)
+            temp_surface = pygame.Surface(glow_size, pygame.SRCALPHA)
+            
+            # Color based on expression
+            if expression == "happy":
+                glow_color = (*self.YELLOW, alpha)
+            elif expression == "sad":
+                glow_color = (*self.BLUE, alpha)
+            elif expression == "surprised":
+                glow_color = (*self.ORANGE, alpha)
+            else:  # neutral
+                glow_color = (*self.GRAY, alpha)
+            
+            pygame.draw.rect(temp_surface, glow_color, temp_surface.get_rect(), border_radius=20)
+            glow_surface.blit(temp_surface, (20 - i * 4, 20 - i * 4))
+        
+        # Draw glow
+        self.screen.blit(glow_surface, (final_x - 20, final_y - 20))
+        
+        # Draw the image
+        self.screen.blit(rotated_image, (final_x, final_y))
         
     def init_particles(self):
         """Initialize floating particles for background"""
@@ -430,6 +527,18 @@ class UIManager:
             frame_surface, (camera_width, camera_height)
         )
         self.screen.blit(frame_surface, (camera_x, camera_y))
+
+        # Draw animated expression images on both sides
+        if current_challenge:
+            # Left side - expression image
+            left_x = 150
+            left_y = 350
+            self.draw_animated_expression_image(current_challenge, left_x, left_y)
+            
+            # Right side - expression image (mirror animation)
+            right_x = self.width - 150
+            right_y = 350
+            self.draw_animated_expression_image(current_challenge, right_x, right_y)
 
         # Draw challenge text
         from game_logic import GameLogic
