@@ -581,49 +581,222 @@ class UIManager:
         self.screen.blit(emoji_surface, emoji_rect)
 
     def draw_results(self, score, max_score):
-        """Draw results screen"""
-        self.screen.fill(self.BLACK)
-
-        # Title
-        title = self.title_font.render("GAME OVER!", True, self.RED)
-        title_rect = title.get_rect(center=(self.width // 2, 150))
-        self.screen.blit(title, title_rect)
-
-        # Score
-        score_text = f"Skor Akhir: {score}"
-        score_surface = self.large_font.render(score_text, True, self.YELLOW)
-        score_rect = score_surface.get_rect(center=(self.width // 2, 280))
-        self.screen.blit(score_surface, score_rect)
-
-        # Performance message
+        """Draw enhanced results screen with animations"""
+        # Update animation time for effects
+        self.menu_time += 0.05
+        
+        # Animated gradient background
+        t = math.sin(self.menu_time * 0.5) * 0.5 + 0.5
+        color1 = (int(10 + t * 30), int(5 + t * 20), int(30 + t * 50))
+        color2 = (int(40 + t * 40), int(10 + t * 30), int(60 + t * 60))
+        self.draw_gradient_background(color1, color2)
+        
+        # Draw animated particles
+        self.update_particles()
+        
+        # Calculate performance (cap at 100% for display)
         percentage = (score / max_score * 100) if max_score > 0 else 0
+        display_percentage = min(percentage, 100)  # Cap at 100% for visual display
+        
+        # Determine rank and colors
         if percentage >= 80:
-            message = "*** LUAR BIASA! ***"
-            color = self.GREEN
+            rank = "S"
+            rank_color = self.YELLOW
+            message = "LUAR BIASA!"
+            message_color = self.GREEN
+            particle_color = self.YELLOW
+            stars_count = 5
         elif percentage >= 60:
-            message = "++ BAGUS SEKALI! ++"
-            color = self.BLUE
+            rank = "A"
+            rank_color = self.GREEN
+            message = "BAGUS SEKALI!"
+            message_color = self.BLUE
+            particle_color = self.GREEN
+            stars_count = 4
         elif percentage >= 40:
-            message = "= CUKUP BAIK! ="
-            color = self.WHITE
+            rank = "B"
+            rank_color = self.BLUE
+            message = "CUKUP BAIK!"
+            message_color = self.CYAN
+            particle_color = self.BLUE
+            stars_count = 3
         else:
-            message = "~ TERUS BERLATIH! ~"
-            color = self.GRAY
-
-        message_surface = self.medium_font.render(message, True, color)
-        message_rect = message_surface.get_rect(center=(self.width // 2, 370))
-        self.screen.blit(message_surface, message_rect)
-
-        # Restart instruction
-        restart_text = "Tekan SPASI untuk main lagi"
-        restart_surface = self.small_font.render(restart_text, True, self.WHITE)
-        restart_rect = restart_surface.get_rect(center=(self.width // 2, 480))
-        self.screen.blit(restart_surface, restart_rect)
-
-        exit_text = "Tekan ESC untuk keluar"
-        exit_surface = self.small_font.render(exit_text, True, self.GRAY)
-        exit_rect = exit_surface.get_rect(center=(self.width // 2, 520))
-        self.screen.blit(exit_surface, exit_rect)
+            rank = "C"
+            rank_color = self.GRAY
+            message = "TERUS BERLATIH!"
+            message_color = self.WHITE
+            particle_color = self.GRAY
+            stars_count = 1
+        
+        # Draw decorative circles with pulse
+        pulse = math.sin(self.menu_time * 2) * 15
+        for i in range(6):
+            alpha = int(20 - i * 3)
+            size = int(180 + pulse + i * 35)
+            circle_surface = pygame.Surface((size * 2, size * 2), pygame.SRCALPHA)
+            pygame.draw.circle(circle_surface, (*rank_color, alpha), (size, size), size, 4)
+            self.screen.blit(circle_surface, (self.width // 2 - size, 120 - size))
+        
+        # Animated title with bounce
+        bounce = math.sin(self.menu_time * 2.5) * 8
+        title_y = 120 + bounce
+        
+        # Draw "SELESAI!" title with glow
+        for i in range(5, 0, -1):
+            glow_alpha = 40 - i * 6
+            glow_surface = self.title_font.render("SELESAI!", True, (*rank_color, glow_alpha))
+            glow_rect = glow_surface.get_rect(center=(self.width // 2, title_y))
+            self.screen.blit(glow_surface, glow_rect)
+        
+        title = self.title_font.render("SELESAI!", True, self.WHITE)
+        title_rect = title.get_rect(center=(self.width // 2, title_y))
+        self.screen.blit(title, title_rect)
+        
+        # Draw rank badge with animation
+        rank_y = 230
+        rank_pulse = math.sin(self.menu_time * 3) * 10
+        rank_size = 120 + rank_pulse
+        
+        # Rank background circle
+        rank_bg_surface = pygame.Surface((rank_size * 2, rank_size * 2), pygame.SRCALPHA)
+        pygame.draw.circle(rank_bg_surface, (*rank_color, 150), (rank_size, rank_size), rank_size)
+        pygame.draw.circle(rank_bg_surface, (*self.WHITE, 200), (rank_size, rank_size), rank_size, 8)
+        self.screen.blit(rank_bg_surface, (self.width // 2 - rank_size, rank_y - rank_size))
+        
+        # Rank text
+        rank_font = pygame.font.Font(None, 140)
+        rank_surface = rank_font.render(rank, True, self.WHITE)
+        rank_rect = rank_surface.get_rect(center=(self.width // 2, rank_y))
+        self.screen.blit(rank_surface, rank_rect)
+        
+        # Draw stars based on performance
+        star_y = rank_y + 100
+        star_spacing = 60
+        total_stars_width = stars_count * star_spacing
+        star_start_x = (self.width - total_stars_width) // 2 + star_spacing // 2
+        
+        for i in range(stars_count):
+            star_bounce = math.sin(self.menu_time * 2 + i * 0.5) * 5
+            star_x = star_start_x + i * star_spacing
+            self.draw_star(star_x, star_y + star_bounce, 20, particle_color)
+        
+        # Results box - adjusted position and size for better fit
+        box_y = rank_y + 160
+        box_width = 700
+        box_height = 180
+        box_rect = pygame.Rect((self.width - box_width) // 2, box_y, box_width, box_height)
+        
+        # Box glow effect
+        for i in range(5, 0, -1):
+            glow_alpha = 40 - i * 6
+            glow_surface = pygame.Surface((box_width + i * 8, box_height + i * 8), pygame.SRCALPHA)
+            pygame.draw.rect(glow_surface, (*rank_color, glow_alpha), glow_surface.get_rect(), border_radius=25)
+            self.screen.blit(glow_surface, (box_rect.x - i * 4, box_rect.y - i * 4))
+        
+        # Box background
+        box_surface = pygame.Surface((box_width, box_height), pygame.SRCALPHA)
+        pygame.draw.rect(box_surface, (20, 15, 40, 220), box_surface.get_rect(), border_radius=25)
+        pygame.draw.rect(box_surface, rank_color, box_surface.get_rect(), width=4, border_radius=25)
+        self.screen.blit(box_surface, box_rect)
+        
+        # Performance message with glow
+        self.draw_text_with_glow(message, self.large_font, message_color, 
+                                self.width // 2, box_y + 35)
+        
+        # Score with animation
+        score_pulse = math.sin(self.menu_time * 4) * 3
+        score_text = f"SKOR: {score} / {max_score}"
+        score_font = pygame.font.Font(None, 48)
+        score_surface = score_font.render(score_text, True, self.YELLOW)
+        score_rect = score_surface.get_rect(center=(self.width // 2, box_y + 90 + score_pulse))
+        
+        # Score shadow
+        shadow_surface = score_font.render(score_text, True, (20, 20, 40))
+        shadow_rect = shadow_surface.get_rect(center=(self.width // 2 + 3, box_y + 93 + score_pulse))
+        self.screen.blit(shadow_surface, shadow_rect)
+        self.screen.blit(score_surface, score_rect)
+        
+        # Percentage bar - FIX: Cap fill_width to not exceed bar_width
+        bar_y = box_y + 130
+        bar_width = 500
+        bar_height = 30
+        bar_x = (self.width - bar_width) // 2
+        
+        # Bar background
+        pygame.draw.rect(self.screen, (40, 40, 60), (bar_x, bar_y, bar_width, bar_height), border_radius=15)
+        
+        # Filled bar with gradient effect - capped at 100% and rounded
+        fill_width = int((display_percentage / 100) * bar_width)
+        fill_width = min(fill_width, bar_width)  # Ensure it doesn't exceed bar width
+        
+        if fill_width > 0:
+            # Create a surface for the filled bar with rounded corners
+            fill_surface = pygame.Surface((fill_width, bar_height), pygame.SRCALPHA)
+            
+            # Draw gradient on the fill surface
+            for i in range(fill_width):
+                progress = i / bar_width
+                bar_color = (
+                    int(rank_color[0] * (1 - progress * 0.3)),
+                    int(rank_color[1] * (1 - progress * 0.3)),
+                    int(rank_color[2] * (1 - progress * 0.3))
+                )
+                pygame.draw.line(fill_surface, bar_color, (i, 0), (i, bar_height))
+            
+            # Create a mask surface with rounded corners
+            mask_surface = pygame.Surface((fill_width, bar_height), pygame.SRCALPHA)
+            pygame.draw.rect(mask_surface, (255, 255, 255, 255), (0, 0, fill_width, bar_height), border_radius=15)
+            
+            # Apply the mask to create rounded fill
+            fill_surface.blit(mask_surface, (0, 0), special_flags=pygame.BLEND_RGBA_MIN)
+            
+            # Draw the rounded filled bar
+            self.screen.blit(fill_surface, (bar_x, bar_y))
+        
+        # Bar border
+        pygame.draw.rect(self.screen, self.WHITE, (bar_x, bar_y, bar_width, bar_height), 
+                        width=3, border_radius=15)
+        
+        # Percentage text - show actual percentage even if over 100%
+        percent_text = f"{int(percentage)}%"
+        percent_surface = self.medium_font.render(percent_text, True, self.WHITE)
+        percent_rect = percent_surface.get_rect(center=(self.width // 2, bar_y + bar_height // 2))
+        self.screen.blit(percent_surface, percent_rect)
+        
+        # Control instructions with animation - adjusted position to fit screen
+        controls_y = box_y + box_height + 40
+        button_pulse = math.sin(self.menu_time * 3) * 8
+        
+        # Restart button
+        restart_y = controls_y
+        self.draw_fancy_button("▶ MAIN LAGI [SPASI]", self.width // 2, restart_y, 
+                              self.GREEN, 12 + button_pulse)
+        
+        # Exit button - adjusted spacing
+        exit_y = restart_y + 55
+        self.draw_fancy_button("✕ KELUAR [ESC]", self.width // 2, exit_y, 
+                              self.RED, 8)
+        
+        # Floating confetti particles for high scores
+        if percentage >= 60:
+            self.draw_confetti()
+    
+    def draw_confetti(self):
+        """Draw confetti particles for celebration"""
+        for i in range(15):
+            x = (self.width // 2) + math.sin(self.menu_time + i) * 400
+            y = 100 + ((self.menu_time * 50 + i * 50) % (self.height - 100))
+            size = 8 + (i % 3) * 4
+            colors = [self.YELLOW, self.PINK, self.CYAN, self.GREEN, self.ORANGE]
+            color = colors[i % len(colors)]
+            rotation = (self.menu_time * 100 + i * 30) % 360
+            
+            # Draw rotating rectangle (confetti piece)
+            rect_surface = pygame.Surface((size * 2, size), pygame.SRCALPHA)
+            rect_surface.fill(color)
+            rotated = pygame.transform.rotate(rect_surface, rotation)
+            rect_rect = rotated.get_rect(center=(int(x), int(y)))
+            self.screen.blit(rotated, rect_rect)
     
     def draw_difficulty_selection(self, selected_index=0):
         """Draw difficulty selection screen"""
