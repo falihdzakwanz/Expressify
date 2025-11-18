@@ -485,6 +485,55 @@ class UIManager:
         pygame.draw.polygon(self.screen, color, points)
         pygame.draw.polygon(self.screen, self.WHITE, points, 2)
 
+    def draw_challenge_header(self, expression_key, y_pos=50):
+        """Render the current challenge text with emoji support"""
+        if not expression_key:
+            return
+
+        from game_logic import GameLogic
+
+        # Access display text (format: "😊 SENYUM LEBAR!")
+        game_logic = GameLogic()
+        full_text = game_logic.expression_names.get(expression_key, "")
+        if not full_text:
+            return
+
+        # Try to split emoji from the rest of the text
+        emoji_char = None
+        label_text = full_text
+
+        if " " in full_text:
+            possible_emoji, remainder = full_text.split(" ", 1)
+            if not possible_emoji.isascii():
+                emoji_char = possible_emoji
+                label_text = remainder
+
+        center_x = self.width // 2
+
+        if emoji_char:
+            # Render emoji with emoji-capable font
+            emoji_surface = self.emoji_font.render(emoji_char, True, self.WHITE)
+            text_surface = self.large_font.render(label_text, True, self.YELLOW)
+
+            spacing = 18
+            total_width = emoji_surface.get_width() + spacing + text_surface.get_width()
+            emoji_pos = (
+                center_x - total_width // 2,
+                y_pos - emoji_surface.get_height() // 2
+            )
+            text_pos = (
+                emoji_pos[0] + emoji_surface.get_width() + spacing,
+                y_pos - text_surface.get_height() // 2
+            )
+
+            self.screen.blit(emoji_surface, emoji_pos)
+            self.screen.blit(text_surface, text_pos)
+        else:
+            # Fallback to standard rendering
+            text_surface = self.large_font.render(full_text, True, self.YELLOW)
+            text_rect = text_surface.get_rect(center=(center_x, y_pos))
+            self.screen.blit(text_surface, text_rect)
+
     def draw_game(self, frame, current_challenge, score, remaining_time):
         """Draw game playing screen"""
         self.screen.fill(self.BLACK)
@@ -506,14 +555,8 @@ class UIManager:
         )
         self.screen.blit(frame_surface, (camera_x, camera_y))
 
-        # Draw challenge text
-        from game_logic import GameLogic
-
-        game_logic = GameLogic()
-        challenge_text = game_logic.expression_names.get(current_challenge, "")
-        challenge = self.large_font.render(challenge_text, True, self.YELLOW)
-        challenge_rect = challenge.get_rect(center=(self.width // 2, 50))
-        self.screen.blit(challenge, challenge_rect)
+        # Draw challenge text with emoji support
+        self.draw_challenge_header(current_challenge)
 
         # Draw score
         score_text = f"Skor: {score}"
@@ -560,14 +603,8 @@ class UIManager:
             right_y = 350
             self.draw_animated_expression_image(current_challenge, right_x, right_y)
 
-        # Draw challenge text
-        from game_logic import GameLogic
-
-        game_logic = GameLogic()
-        challenge_text = game_logic.expression_names.get(current_challenge, "")
-        challenge = self.large_font.render(challenge_text, True, self.YELLOW)
-        challenge_rect = challenge.get_rect(center=(self.width // 2, 50))
-        self.screen.blit(challenge, challenge_rect)
+        # Draw challenge text with emoji support
+        self.draw_challenge_header(current_challenge)
 
         # Draw score
         score_text = f"Skor: {score}"
