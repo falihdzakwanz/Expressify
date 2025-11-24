@@ -55,8 +55,14 @@ class ParticleSystem:
                 'direction': random.uniform(0, 2 * math.pi)
             })
     
-    def update_and_draw(self, screen):
-        """Update and draw all particles"""
+    def update_and_draw(self, screen, exclude_area=None):
+        """
+        Update and draw all particles
+        
+        Args:
+            screen: Pygame screen surface
+            exclude_area: Optional tuple (x, y, width, height) to exclude from rendering
+        """
         for particle in self.particles:
             # Update position
             particle['x'] += math.cos(particle['direction']) * particle['speed']
@@ -71,6 +77,14 @@ class ParticleSystem:
                 particle['y'] = self.height
             elif particle['y'] > self.height:
                 particle['y'] = 0
+            
+            # Check if particle is in excluded area
+            if exclude_area:
+                ex, ey, ew, eh = exclude_area
+                margin = 30  # Smaller margin for particles
+                if (ex - margin <= particle['x'] <= ex + ew + margin and 
+                    ey - margin <= particle['y'] <= ey + eh + margin):
+                    continue  # Skip rendering this particle
             
             # Draw particle with glow effect
             for i in range(3, 0, -1):

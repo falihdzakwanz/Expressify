@@ -119,10 +119,23 @@ class GameScreen:
             )
             screen.blit(glow_surface, (glow_rect.x, glow_rect.y))
         
-        # Draw camera feed
-        screen.blit(frame_surface, (camera_x, camera_y))
+        # Create surface with rounded corners for camera feed
+        camera_surface = pygame.Surface((camera_width, camera_height), pygame.SRCALPHA)
         
-        # Draw border
+        # Draw the frame on the surface
+        camera_surface.blit(frame_surface, (0, 0))
+        
+        # Create mask with rounded corners
+        mask_surface = pygame.Surface((camera_width, camera_height), pygame.SRCALPHA)
+        pygame.draw.rect(mask_surface, (255, 255, 255, 255), (0, 0, camera_width, camera_height), border_radius=12)
+        
+        # Apply mask to create rounded corners
+        camera_surface.blit(mask_surface, (0, 0), special_flags=pygame.BLEND_RGBA_MIN)
+        
+        # Draw camera feed with rounded corners
+        screen.blit(camera_surface, (camera_x, camera_y))
+        
+        # Draw border with matching rounded corners
         pygame.draw.rect(
             screen, self.colors.CYAN,
             (camera_x, camera_y, camera_width, camera_height),
