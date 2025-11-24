@@ -1,0 +1,71 @@
+MIT License
+
+Copyright (c) 2025 Expressify Team
+
+- Hamka Putra Andiyan
+- Bayu Ega Ferdana
+- Falih Dzakwan Zuhdi
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+---
+
+ACADEMIC USE NOTICE:
+
+This project was developed as part of the "Sistem Teknologi Multimedia"
+(Multimedia Technology Systems) course assignment. While the MIT License
+allows for commercial use, this project is primarily intended for
+educational and academic purposes.
+
+If you use this project for academic purposes, please cite:
+
+Expressify - Face Expression Game
+Authors: Hamka Putra Andiyan, Bayu Ega Ferdana, Falih Dzakwan Zuhdi
+Course: Sistem Teknologi Multimedia
+Year: 2025
+Repository: https://github.com/Yuuggaa/Expressify
+
+---
+
+THIRD-PARTY LICENSES:
+
+This software uses the following open-source packages:
+
+1. MediaPipe (Apache License 2.0)
+   Copyright 2019 The MediaPipe Authors
+   https://github.com/google/mediapipe
+
+2. OpenCV (Apache License 2.0)
+   Copyright 2000-2024, Intel Corporation, all rights reserved
+   https://opencv.org/license/
+
+3. Pygame (GNU LGPL version 2.1)
+   Copyright (C) 2000-2024 pygame authors
+   https://www.pygame.org/docs/
+
+4. NumPy (BSD License)
+   Copyright (c) 2005-2024, NumPy Developers
+   https://numpy.org/doc/stable/license.html
+
+5. Pillow (HPND License)
+   Copyright © 1997-2011 by Secret Labs AB
+   Copyright © 1995-2011 by Fredrik Lundh
+   https://github.com/python-pillow/Pillow/blob/main/LICENSE
+
+Please refer to each package's license for more details.

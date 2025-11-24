@@ -2,7 +2,7 @@ import cv2
 import pygame
 from face_detector import FaceDetector
 from game_logic import GameLogic
-from ui_manager import UIManager
+from ui import UIManager
 from sound_manager import SoundManager
 from leaderboard_manager import LeaderboardManager
 
@@ -201,17 +201,17 @@ class Expressify:
         elif self.game_state == "results":
             if key == pygame.K_SPACE:
                 self.sound_manager.play("start")
-                self.game_state = "menu"
+                self.game_state = "difficulty_select"
                 self.sound_manager.stop("high_score")
                 self.sound_manager.stop("botHigh_score")
                 self.sound_manager.stop("upLow_score")
                 self.sound_manager.stop("low_score")
                 self.sound_manager.play("bgm", loops=-1)
                 self.game_logic.reset()
-                self.menu_index = 0
             elif key == pygame.K_ESCAPE:
                 self.game_state = "menu"
                 self.menu_index = 0
+                self.player_name = ""  # Reset nama ketika kembali ke menu
 
     def cleanup(self):
         """Clean up resources"""
