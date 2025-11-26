@@ -42,5 +42,31 @@ Thumbs.db
 desktop.ini
 
 # Project specific
-*.log
 .cache/
+leaderboard.json
+
+# PyInstaller build files
+build/
+dist/
+*.spec
+*.manifest
+*.exe
+
+# LaTeX
+*.aux
+*.fdb_latexmk
+*.fls
+*.out
+*.synctex.gz
+*.toc
+*.bbl
+*.blg
+*.bcf
+*.run.xml
+*.nav
+*.snm
+*.vrb
+*.lof
+*.lot
+reports/*.log
+
